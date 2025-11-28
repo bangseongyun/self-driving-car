@@ -1,6 +1,12 @@
+import rclpy
+from rclpy.node import Node
 import cv2
 import numpy as np
 import math
+
+def main(args=None):
+    # ROS 2 초기화
+    rclpy.init(args=args)
 #메인 실행 코드
 
 #1. 카메라 연결 (0:외장 카메라, 2: 내장 카메라)
@@ -83,13 +89,13 @@ while cap.isOpened():
                         #왼쪽 차선(음수 기울기, 화면 중앙 왼쪽)
                         left_slopes.append(slope) #유효하다고 판단된 왼쪽 기울기 값을 리스트 저장
                         left_coords.append([x1, y1_orig, x2, y2_orig]) #모든 왼쪽 유효 선분의 좌표를 리스트 저장
-                        cv2.line(line_draw, (x1_line, y1_line), (x2_line, y2_line), (0, 255, 0), 2)
+                        #cv2.line(line_draw, (x1_line, y1_line), (x2_line, y2_line), (0, 255, 0), 2)
                     #기울기가 양수이고 평균x 좌표가 화면 중앙보다 클때
                     elif 0 < slope and center_x < avg_x:
                           #오른쪽 차선: (양수 기울기, 화면 중앙 오른쪽)
                           right_slopes.append(slope) #유효하다고 판단된 오른쪽 기울기 값을 리스트 저장
                           right_coords.append([x1, y1_orig, x2, y2_orig]) #모든 오른쪽 유효 선분의 좌표를 리스트 저장
-                          cv2.line(line_draw, (x1_line, y1_line), (x2_line, y2_line), (255, 0, 0), 2)
+                          #cv2.line(line_draw, (x1_line, y1_line), (x2_line, y2_line), (255, 0, 0), 2)
         
         if left_slopes: 
             #평균 기울기 = sigma(유효한 기울기 값)/ 유효한 기울기 개수 계산
@@ -147,11 +153,12 @@ while cap.isOpened():
             avg_right_slope = None
             print("오른쪽 차선 기울기를 계산할 유효한 선분이 부족함")
     
-    cv2.imshow("Frame", frame)
+    cv2.imshow("frame", frame)
     cv2.imshow("roi", roi)
     cv2.imshow("grayscale", roi_gray)
     cv2.imshow("gaussian blur", blur)
     cv2.imshow("canny edges", edges)
+    cv2.imshow("lane detection result", line_draw)
 
     if cv2.waitKey(1) == ord('q'):
         break
@@ -159,3 +166,9 @@ while cap.isOpened():
 # 카메라 장치 해제 및 모든 창 닫기
 cap.release() 
 cv2.destroyAllWindows()
+
+rclpy.shutdown()
+
+# 스크립트를 직접 실행할 때 main 함수 호출
+if __name__ == '__main__':
+    main()
